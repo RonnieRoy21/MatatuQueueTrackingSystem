@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "539600706792",
+    "project_id": "queuetrack-84755",
+    "storage_bucket": "queuetrack-84755.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:539600706792:android:ed5154ab657e42143f7d5d",
+        "android_client_info": {
+          "package_name": "com.example.queuetrack"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyALBXzg4FpbjzLQiN8BYX5k9sijsxa9p1s"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
