@@ -1,64 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'dashboard_helper.dart';
-import 'view_queue_status.dart';
+import 'package:flutter/services.dart';
+import 'package:queuetrack/QueueModel/queue_model.dart';
+import '../dashboard_helper.dart';
+import '../view_queue_status.dart';
 import 'driver_profile_screen.dart';
 
 
 class DriverDashboard extends StatelessWidget {
-  const DriverDashboard({super.key});
-
-  final String stageId = 'main_stage'; // same as Sacco dashboard
-
-  // ✅ Driver check-in flow
-Future<void> _checkIn(BuildContext context) async {
-  final user = FirebaseAuth.instance.currentUser;
-  if (user == null) return;
-
-  final firestore = FirebaseFirestore.instance;
-  final stageId = 'main_stage';
-
-  // Step 1: Get driver info
-  final driverDoc = await firestore.collection('users').doc(user.uid).get();
-  final driverName = driverDoc.data()?['fullName'] ?? 'Driver';
-
-  // Step 2: Find assigned vehicle
-  final vehicleSnap = await firestore
-      .collection('vehicles')
-      .where('driverId', isEqualTo: user.uid)
-      .limit(1)
-      .get();
-
-  String vehicleNumber = 'UNKNOWN';
-  String ownerId = 'UNKNOWN_OWNER';
-
-  if (vehicleSnap.docs.isNotEmpty) {
-    final vData = vehicleSnap.docs.first.data();
-    vehicleNumber = vData['vehicleNumber'] ?? 'UNKNOWN';
-    ownerId = vData['ownerId'] ?? 'UNKNOWN_OWNER';
-  }
-
-  // Step 3: Get queue size safely
-  final queueRef = firestore.collection('queues').doc(stageId).collection('vehicles');
-  final queueSnapshot = await queueRef.get();
-  final newPos = queueSnapshot.docs.length + 1;
-
-  // Step 4: Save check-in
-  await queueRef.add({
-    'driverId': user.uid,
-    'driverName': driverName,
-    'checkedInAt': FieldValue.serverTimestamp(),
-    'status': 'waiting',
-    'position': newPos,
-    'vehicleNumber': vehicleNumber,
-    'ownerId': ownerId,
-  });
-
-  ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(content: Text("✅ $driverName checked in successfully!")),
-  );
-}
+  
+   DriverDashboard({super.key,});
+final  QueueModel queueModel=QueueModel();
+final FirebaseFirestore firestore=FirebaseFirestore.instance;
+final TextEditingController vehicleNumberController=TextEditingController();
 
 
   // ✅ View trip history
@@ -127,6 +82,31 @@ Future<void> _checkIn(BuildContext context) async {
     );
   }
 
+  Future _checkInUi(BuildContext context) {
+    return showModalBottomSheet(
+        context: context,
+        builder: (context){
+      return TextFormField(
+        controller: vehicleNumberController,
+        keyboardType: TextInputType.number,
+        decoration: const InputDecoration(
+          hintText: 'Enter vehicle number',
+          border: OutlineInputBorder(),
+        ),
+        validator: (value){
+          if(value!.isEmpty){
+            return 'Please enter a vehicle number';
+          }
+          return null;
+        },
+        onFieldSubmitted: (value){
+          queueModel.requestCheckIn(vehicleNumber: value);
+          Navigator.pop(context);
+
+        }
+      );
+    });
+  }
   @override
   Widget build(BuildContext context) => buildDashboard(
         'Driver Dashboard',
@@ -135,7 +115,7 @@ Future<void> _checkIn(BuildContext context) async {
             'title': 'Check-in Stage',
             'icon': Icons.check_circle,
             'color': Colors.blue,
-            'onTap': (ctx) => _checkIn(ctx),
+            'onTap': (ctx) => _checkInUi(context),
           },
           {
             'title': 'View Queue Status',
@@ -144,7 +124,7 @@ Future<void> _checkIn(BuildContext context) async {
             'onTap': (ctx) {
               Navigator.push(
                 ctx,
-                MaterialPageRoute(builder: (_) => const ViewQueueStatus()),
+                MaterialPageRoute(builder: (_) => ViewQueueStatus()),
               );
             },
           },

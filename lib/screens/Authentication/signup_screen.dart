@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class SignUpScreen extends StatefulWidget {
-  const SignUpScreen({super.key});
+  final String selectedRole;
+  const SignUpScreen({super.key,required this.selectedRole});
 
   @override
   State<SignUpScreen> createState() => _SignUpScreenState();
@@ -11,7 +13,7 @@ class SignUpScreen extends StatefulWidget {
 
 class _SignUpScreenState extends State<SignUpScreen> {
   final nameController = TextEditingController();
-  final phoneController = TextEditingController();
+  final idNumberController = TextEditingController();
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   final confirmController = TextEditingController();
@@ -24,37 +26,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   /// Dropdown labels (user friendly)
   final roles = [
-    'Driver',
-    'Conductor',
-    'Stage Marshal',
-    'Sacco Official',
-    'Matatu Owner',
+    'Sacco_Official',
+    'Matatu_Owner',
   ];
 
-  /// ✅ Map labels → canonical role keys
-  String roleKey(String label) {
-    switch (label) {
-      case 'Driver':
-        return 'driver';
-      case 'Conductor':
-        return 'conductor';
-      case 'Stage Marshal':
-        return 'stageMarshal';
-      case 'Sacco Official':
-        return 'saccoOfficial';
-      case 'Matatu Owner':
-        return 'matatuOwner';
-      default:
-        return '';
-    }
-  }
+  Future<void> _signUp({required String category}) async {
 
-  Future<void> _signUp() async {
-    if (selectedRole == null) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('Please choose a role')));
-      return;
-    }
     if (passwordController.text != confirmController.text) {
       ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Passwords do not match')));
@@ -70,19 +47,24 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
       final userId = cred.user!.uid;
 
-      /// ✅ Save role in canonical form
-      await _fs.collection('users').doc(userId).set({
-        'fullName': nameController.text.trim(),
-        'email': emailController.text.trim(),
-        'phone': phoneController.text.trim(),
-        'role': roleKey(selectedRole!), // save correct role
-        'createdAt': FieldValue.serverTimestamp(),
-      });
-
-      ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Account created successfully')));
-
-      if (mounted) Navigator.pop(context);
+      if(selectedRole!.toLowerCase()=='matatu_owner'){
+        //create matatu owner user
+        await _fs.collection(category).doc(userId).set({
+                'ownerName': nameController.text.trim(),
+                'ownerEmail': emailController.text.trim(),
+                'ownerId': idNumberController.text.trim(),
+              });
+        Fluttertoast.showToast(msg: 'Account created');
+      }else{
+        //create sacco official owner user
+        await _fs.collection(category.toLowerCase()).doc(userId).set({
+          'saccoOfficialName':nameController.text.trim(),
+          'saccoOfficialEmail':emailController.text.trim(),
+          'saccoOfficialId':idNumberController.text.trim(),
+        });
+        Fluttertoast.showToast(msg: 'Account created');
+      }
+      // if (!mounted) Navigator.pop(context);
     } on FirebaseAuthException catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(e.message ?? 'Sign up failed')));
@@ -97,7 +79,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   @override
   void dispose() {
     nameController.dispose();
-    phoneController.dispose();
+    idNumberController.dispose();
     emailController.dispose();
     passwordController.dispose();
     confirmController.dispose();
@@ -121,9 +103,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         const InputDecoration(labelText: 'Full name')),
                 const SizedBox(height: 12),
                 TextField(
-                    controller: phoneController,
+                    controller: idNumberController,
                     decoration:
-                        const InputDecoration(labelText: 'Phone number')),
+                        const InputDecoration(labelText: 'Your Id Number')),
                 const SizedBox(height: 12),
                 TextField(
                   controller: emailController,
@@ -143,7 +125,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         const InputDecoration(labelText: 'Confirm Password')),
                 const SizedBox(height: 12),
                 DropdownButtonFormField<String>(
-                  value: selectedRole,
+                  initialValue: selectedRole,
                   items: roles
                       .map((r) => DropdownMenuItem(value: r, child: Text(r)))
                       .toList(),
@@ -155,8 +137,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 isLoading
                     ? const CircularProgressIndicator()
                     : ElevatedButton(
-                        onPressed: _signUp,
-                        child: const Text('Create account'),
+                        onPressed: ()async {
+                          await _signUp(category: widget.selectedRole);
+                        },child: const Text('Create account'),
                       ),
               ],
             ),

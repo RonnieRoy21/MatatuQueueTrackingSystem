@@ -1,23 +1,19 @@
 import 'package:flutter/material.dart';
-import 'driver_dashboard.dart';
-import 'conductor_dashboard.dart';
-import 'stage_marshal_dashboard.dart';
-import 'sacco_official_dashboard.dart';
-import 'matatu_owner_dashboard.dart';
+import 'Driver/driver_dashboard.dart';
+import 'StageMarshal/stage_marshal_dashboard.dart';
+import 'SaccoOfficial/sacco_official_dashboard.dart';
+import 'MatatuOwner/matatu_owner_dashboard.dart';
 
-import 'dashboard_helper.dart';
 
-Widget getDashboard(String role) {
+Widget getDashboard(String role,String vehicle) {
   switch (role) {
     case 'driver':
       return DriverDashboard();
-    case 'conductor':
-      return  ConductorDashboard();
-    case 'stageMarshal':
+    case 'stage_marshal':
       return  StageMarshalDashboard();
-    case 'saccoOfficial':
+    case 'sacco_official':
       return  SaccoOfficialDashboard();
-    case 'matatuOwner':
+    case 'matatu_owner':
       return MatatuOwnerDashboard();
     default:
       return Scaffold(

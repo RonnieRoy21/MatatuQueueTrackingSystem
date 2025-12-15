@@ -7,9 +7,9 @@ import 'package:printing/printing.dart';
 import 'package:mailer/mailer.dart';
 import 'package:mailer/smtp_server.dart';
 import 'dart:typed_data';
-import 'dashboard_helper.dart';
+import '../dashboard_helper.dart';
 import 'dart:io';
-import 'vehicle_master_list.dart';
+import '../register_stage_marshal.dart';
 
 
 
@@ -313,8 +313,8 @@ class SaccoOfficialDashboard extends StatelessWidget {
   // -------------------- EMAIL REPORT --------------------
 Future<void> _sendPdfByEmail(BuildContext context, Uint8List pdfBytes) async {
   try {
-    final username = 'nduruhu.nyambura22@students.dkut.ac.ke'; // replace with your email
-    final password = 'nyamburanduruhu@8180';    // use Gmail app password
+// replace with your email
+// use Gmail app password
 
     final smtpServer = gmail('queuetrack2@gmail.com','zcckysyooeahmjcr');
 
@@ -379,12 +379,12 @@ Future<void> _sendPdfByEmail(BuildContext context, Uint8List pdfBytes) async {
             'onTap': (ctx) => _generateDailyPdf(ctx),
           },
           {
-            'title': 'Vehicle Master List',
+            'title': 'Register Stage Marshal',
             'icon': Icons.directions_car,
             'color': Colors.purple,
             'onTap': (ctx) => Navigator.push(
               ctx,
-              MaterialPageRoute(builder: (_) => const VehicleMasterList()),
+              MaterialPageRoute(builder: (_) => RegisterStageMarshal()),
             ),
           },
 
