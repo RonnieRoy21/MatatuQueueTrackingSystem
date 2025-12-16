@@ -44,44 +44,31 @@ class SaccoOfficialDashboard extends StatelessWidget {
       MaterialPageRoute(
         builder: (_) => Scaffold(
           appBar: AppBar(title: const Text("Active Queue")),
-          body: StreamBuilder<QuerySnapshot>(
-            stream: FirebaseFirestore.instance
-                .collection('queues')
-                .doc(stageId)
-                .collection('vehicles')
-                .where('status', isEqualTo: 'waiting')
-                .orderBy('position')
-                .snapshots(),
+          body: StreamBuilder(
+            stream: QueueModel().fetchQueue(),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Center(child: CircularProgressIndicator());
               }
-              if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+              if (!snapshot.hasData) {
                 return const Center(child: Text("No active vehicles in queue"));
               }
 
-              final docs = snapshot.data!.docs;
+              final docs = snapshot.data!;
               return ListView.builder(
                 itemCount: docs.length,
                 itemBuilder: (context, index) {
-                  final data = docs[index].data() as Map<String, dynamic>;
-                  final name = data['driverName'] ?? 'Unknown';
-                  final pos = data['position'] ?? index + 1;
-                  final checkedInAt = data['checkedInAt'];
-
-                  return Card(
+                  final data = docs[index] ;
+                  return (data['status']=='departed')?null:Card(
                     margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     child: ListTile(
                       leading: CircleAvatar(
                         backgroundColor: Colors.teal,
-                        child: Text('$pos', style: const TextStyle(color: Colors.white)),
+                        child: Text(index.toString()),
                       ),
-                      title: Text(name, style: const TextStyle(fontWeight: FontWeight.bold)),
-                      subtitle: Text(
-                        checkedInAt != null
-                            ? "Checked in: ${formatDate(checkedInAt)} (${timeAgo(checkedInAt)})"
-                            : "Checked in: N/A",
-                      ),
+                      title: Text(data['vehicleNumber'], style: const TextStyle(fontWeight: FontWeight.bold)),
+                      subtitle: Text(data['driverName']),
+                      trailing:Text(data['status'])
                     ),
                   );
                 },
@@ -100,8 +87,8 @@ class SaccoOfficialDashboard extends StatelessWidget {
       MaterialPageRoute(
         builder: (_) => Scaffold(
           appBar: AppBar(title: const Text("Departed Vehicles Log")),
-          body: FutureBuilder(
-            future:QueueModel().fetchDepartedQueue(),
+          body: StreamBuilder(
+            stream:QueueModel().fetchQueue(),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Center(child: CircularProgressIndicator());
@@ -115,22 +102,33 @@ class SaccoOfficialDashboard extends StatelessWidget {
               }
 
               final docs = snapshot.data!;
+              print("departed data : ${docs.first}");
               return ListView.builder(
                 itemCount: docs.length,
                 itemBuilder: (context, index) {
                   final data =docs[index];
                   print("departed data : $data");
 
-                  return Card(
-                    margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  return (data['status'].toString().contains('departed'))?Card(
+                    margin: const EdgeInsets.all(8),
                     color: Colors.blueGrey.shade50,
                     child: Column(
                       children: [
-                        ListTile(),
-                        ListTile()
+                        ListTile(
+                          leading: Text(index.toString()),
+                          title: Text(data['vehicleNumber']),
+                          subtitle: Text(data['driverName']),
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            Text("${data['status']}   At "),
+                            Text(data['createdAt']),
+                          ],
+                        ),
                       ],
                     )
-                  );
+                  ):null;
                 },
               );
             },
@@ -249,7 +247,7 @@ class SaccoOfficialDashboard extends StatelessWidget {
               ? "Peak hour: ${peakHour.toString().padLeft(2, '0')}:00 - ${peakHour + 1}:00"
               : "Peak hour: N/A"),
           pw.SizedBox(height: 15),
-          pw.Table.fromTextArray(
+          pw.TableHelper.fromTextArray(
             headers: ["Driver", "Position", "Checked In", "Departed", "Status"],
             data: vehiclesSnapshot.docs.map((doc) {
               final data = doc.data();

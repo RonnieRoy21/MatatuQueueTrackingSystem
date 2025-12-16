@@ -3,18 +3,27 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
 
-class RegisterStageMarshal extends StatelessWidget {
+class RegisterStageMarshal extends StatefulWidget {
    RegisterStageMarshal({super.key});
 
+  @override
+  State<RegisterStageMarshal> createState() => _RegisterStageMarshalState();
+}
+
+class _RegisterStageMarshalState extends State<RegisterStageMarshal> {
   String formatDate(dynamic timestamp) {
     if (timestamp == null || timestamp is! Timestamp) return 'N/A';
     return DateFormat('d/M/yyyy  h:mm a').format(timestamp.toDate());
   }
 
   final _formKey = GlobalKey<FormState>();
+
   final _fStore=FirebaseFirestore.instance;
+
   final TextEditingController emailController=TextEditingController();
+
   final TextEditingController nameController=TextEditingController();
+
   final TextEditingController idController=TextEditingController();
 
   bool isLoading=false;
@@ -57,6 +66,7 @@ class RegisterStageMarshal extends StatelessWidget {
       },
     );
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/services.dart';
 import 'package:queuetrack/QueueModel/queue_model.dart';
 import 'package:queuetrack/screens/Driver/maps_view.dart';
 import '../dashboard_helper.dart';

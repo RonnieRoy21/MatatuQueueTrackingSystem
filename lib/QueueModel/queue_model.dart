@@ -1,6 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 class QueueModel {
 
@@ -37,11 +35,7 @@ Future requestCheckIn({
         .map((snapshot) =>
         snapshot.docs.map((doc) => doc.data()).toList());
   }
-//fetch queue where status is departed only
-  Future<List<Map<String, dynamic>>> fetchDepartedQueue() {
-    final response= _fStore.collection('driver').where('status', isEqualTo: 'departed').get();
-    return response.then((snapshot) => snapshot.docs.map((doc) => doc.data()).toList());
-  }
+
 
 //approve driver in queue
 Future approveDriver({required String vehicleNumber,required String driverName,required String stamp})async{
