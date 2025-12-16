@@ -6,6 +6,7 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import 'package:mailer/mailer.dart';
 import 'package:mailer/smtp_server.dart';
+import 'package:queuetrack/QueueModel/queue_model.dart';
 import 'dart:typed_data';
 import '../dashboard_helper.dart';
 import 'dart:io';
@@ -99,47 +100,36 @@ class SaccoOfficialDashboard extends StatelessWidget {
       MaterialPageRoute(
         builder: (_) => Scaffold(
           appBar: AppBar(title: const Text("Departed Vehicles Log")),
-          body: StreamBuilder<QuerySnapshot>(
-            stream: FirebaseFirestore.instance
-                .collection('queues')
-                .doc(stageId)
-                .collection('vehicles')
-                .where('status', isEqualTo: 'departed')
-                .orderBy('departedAt', descending: true)
-                .snapshots()
-                .handleError((e) => debugPrint("⚠️ Firestore stream error: $e")),
+          body: FutureBuilder(
+            future:QueueModel().fetchDepartedQueue(),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Center(child: CircularProgressIndicator());
               }
               if (snapshot.hasError) {
                 return const Center(
-                    child: Text("Error loading departed logs. Check Firestore index."));
+                    child: Text("Error loading departed logs."));
               }
-              if (snapshot.data == null || snapshot.data!.docs.isEmpty) {
+              if (!snapshot.hasData ) {
                 return const Center(child: Text("No departed records yet"));
               }
 
-              final docs = snapshot.data!.docs;
+              final docs = snapshot.data!;
               return ListView.builder(
                 itemCount: docs.length,
                 itemBuilder: (context, index) {
-                  final data = docs[index].data() as Map<String, dynamic>;
-                  final name = data['driverName'] ?? 'Unknown';
-                  final departedAt = data['departedAt'];
-                  final checkedInAt = data['checkedInAt'];
+                  final data =docs[index];
+                  print("departed data : $data");
 
                   return Card(
                     margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     color: Colors.blueGrey.shade50,
-                    child: ListTile(
-                      leading: const Icon(Icons.directions_bus, color: Colors.teal),
-                      title: Text(name, style: const TextStyle(fontWeight: FontWeight.bold)),
-                      subtitle: Text(
-                        "Checked in: ${formatDate(checkedInAt)}\n"
-                        "Departed: ${formatDate(departedAt)} (${timeAgo(departedAt)})",
-                      ),
-                    ),
+                    child: Column(
+                      children: [
+                        ListTile(),
+                        ListTile()
+                      ],
+                    )
                   );
                 },
               );

@@ -29,12 +29,19 @@ final QueueModel queuemodel =QueueModel();
              final driver = drivers[index];
              print("Driver : $driver");
               return  Card(
-                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                child: ListTile(
-                  leading: Text(driver['status']),
-                  title: Text("${driver['vehicleNumber']}", style: const TextStyle(fontWeight: FontWeight.bold)),
-                  subtitle: Text('${driver['driverName']}'),
-                  trailing: Text('${driver['createdAt']}'),
+                margin: const EdgeInsets.all(8),
+                child: Column(
+                  children: [
+                    ListTile(
+                      leading: Text(index.toString()),
+                      title: Text("${driver['vehicleNumber']}", style: const TextStyle(fontWeight: FontWeight.bold)),
+                      subtitle:Text(driver['driverName'].toString()) ,
+                    ),
+                    ListTile(
+                      title: Text(driver['status']),
+                      trailing: Text('${driver['createdAt']}'),
+                    )
+                  ],
                 ),
               );
             },

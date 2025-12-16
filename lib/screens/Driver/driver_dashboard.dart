@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
 import 'package:queuetrack/QueueModel/queue_model.dart';
+import 'package:queuetrack/screens/Driver/maps_view.dart';
 import '../dashboard_helper.dart';
 import '../view_queue_status.dart';
 import 'driver_profile_screen.dart';
@@ -88,7 +89,7 @@ final TextEditingController vehicleNumberController=TextEditingController();
         builder: (context){
       return TextFormField(
         controller: vehicleNumberController,
-        keyboardType: TextInputType.number,
+        keyboardType: TextInputType.text,
         decoration: const InputDecoration(
           hintText: 'Enter vehicle number',
           border: OutlineInputBorder(),
@@ -141,10 +142,17 @@ final TextEditingController vehicleNumberController=TextEditingController();
             'onTap': (ctx) {
               Navigator.push(
                 ctx,
-                MaterialPageRoute(builder: (_) => const DriverProfileScreen()),
-              );
+                MaterialPageRoute(builder: (_) => const DriverProfileScreen()));
             },
           },
+          {
+            'title': 'Maps View',
+            'icon': Icons.map_outlined,
+            'color': Colors.lightBlue,
+            'onTap': (ctx) {
+              Navigator.push(context, MaterialPageRoute(builder: (context)=> MapsView()));
+            }
+          }
 
         ],
         context,

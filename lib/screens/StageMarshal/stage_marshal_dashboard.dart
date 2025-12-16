@@ -41,28 +41,39 @@ Widget buildQueue(BuildContext context){
             itemBuilder: (context,index){
               final doc=docs[index];
               print("Doc : ${doc}");
-              return ListTile(
-                leading: Text('${doc['status']}'),
-                title: Text('${doc['vehicleNumber']}'),
-                subtitle: Text('${doc['driverName']}'),
-                trailing: Column(
-                  mainAxisSize: MainAxisSize.min,
+              return (doc['status']=='departed')?null:Card(
+                child: Column(
                   children: [
-                    Text('${doc['createdAt']}'),
-                    TextButton(onPressed: ()async{
-                      try {
-                        await queueModel.approveDriver(
+                    ListTile(
+                      leading: Text(index.toString()),
+                      title: Text('${doc['vehicleNumber']}'),
+                      subtitle: Text('${doc['driverName']}'),
+                      trailing: Text('${doc['createdAt']}')
+                    ),
+                    ListTile(
+                        title: Text('${doc['status']}'),
+                        trailing: TextButton(onPressed: () async {
+                          try {
+                            await queueModel.approveDriver(
+                                driverName: doc['driverName'],
+                                stamp: DateTime.now().toString(),
+                                vehicleNumber: doc['vehicleNumber']
+                            );
+                          } catch (err) {
+                            print('Error :${err.toString()}');
+                            Fluttertoast.showToast(msg: "${err.toString()}");
+                          }
+                        }, child: Text('Approve'))
+                    ),
+                    TextButton(onPressed: () async {
+                        await queueModel.departDriver(
                             driverName: doc['driverName'],
                             stamp: DateTime.now().toString(),
                             vehicleNumber: doc['vehicleNumber']
                         );
-                      }catch(err){
-                        print('Error :${err.toString()}');
-                        Fluttertoast.showToast(msg: "${err.toString()}");
-                      }
-                    }, child: Text('Approve'))
+                    }, child: Text('Depart')),
                   ],
-                )
+                ),
               );
             }
         );
