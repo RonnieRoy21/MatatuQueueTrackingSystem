@@ -7,7 +7,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:queuetrack/Database/driver.dart';
 import 'package:queuetrack/screens/Authentication/role_selection.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'firebase_options.dart'; // Your Firebase generated config
+import 'firebase_options.dart';
 
 void main() async {
   try {
@@ -56,10 +56,10 @@ class QueueTrackApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'QueueTrack',
       theme: ThemeData(primarySwatch: Colors.blue),
-      initialRoute: '/roleselection', // ✅ Start with login page
+      initialRoute: '/roleselection', 
       routes: {
         '/roleselection': (_) => const RoleSelection(),
-        // dashboards we’ll navigate  manually
+       
       },
     );
   }
